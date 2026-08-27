@@ -2,14 +2,13 @@ import express from "express";
 import cors from "cors";
 import WebSocket from "ws";
 import { WebSocketServer } from "ws";
-const app = express()
 
-app.use(cors())
-app.use(express.json())
+const app = express();
 
-const PORT = 5000
+app.use(cors());
+app.use(express.json());
 
-
+const PORT = 5000;
 
 const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
@@ -17,21 +16,21 @@ const server = app.listen(PORT, () => {
 
 const wss = new WebSocketServer({ server })
 
-
 const rooms = new Map<string, Map<string, WebSocket>>()
 
 const generateUserId = () => {
-  return Math.random().toString(36).substring(2, 9);
-};
+  return Math.random().toString(36).substring(2, 9)
+}
+
 
 
 wss.on("connection", (socket) => {
-  const userId = generateUserId();
-  console.log(`User connected: ${userId}`);
-  let currentRoom: string | null = null;
+  const userId = generateUserId()
+  console.log(`User connected: ${userId}`)
+  let currentRoom: string | null = null
 
   socket.on("message", (message) => {
-    const data = JSON.parse(message.toString());
+    const data = JSON.parse(message.toString())
     if (data.type === "join-room") {
       const roomId = data.roomId
       currentRoom = roomId
@@ -40,8 +39,7 @@ wss.on("connection", (socket) => {
       }
       const room = rooms.get(roomId)!
       room.set(userId, socket)
-      console.log(`${userId} joined room: ${roomId}`)
-
+      console.log(`${userId} joined room: ${roomId}`);
       socket.send(
         JSON.stringify({
           type: "room-joined",
@@ -49,10 +47,8 @@ wss.on("connection", (socket) => {
           userId,
         })
       )
-
-
       room.forEach((client, existingUserId) => {
-        if (existingUserId !== userId && client.readyState === WebSocket.OPEN) {
+        if ( existingUserId !== userId && client.readyState === WebSocket.OPEN) {
           client.send(
             JSON.stringify({
               type: "user-joined",
@@ -67,29 +63,27 @@ wss.on("connection", (socket) => {
       if (!currentRoom) return;
       const room = rooms.get(currentRoom);
       if (!room) return;
-
-      room.forEach((client, existingUserId) => {
-
-        if (existingUserId !== userId && client.readyState === WebSocket.OPEN) {
-          client.send(
-            JSON.stringify({
-              ...data,
-              from: userId,
-            })
-          )
-        }
-      })
+      const targetSocket = room.get(data.target)
+      if (
+        targetSocket &&
+        targetSocket.readyState === WebSocket.OPEN
+      ) {
+        targetSocket.send(
+          JSON.stringify({
+            ...data,
+            from: userId,
+          })
+        )
+      }
     }
   })
 
   socket.on("close", () => {
-    console.log(`User disconnected: ${userId}`)
-    if (!currentRoom) return
-    const room = rooms.get(currentRoom)
-    if (!room) return
-    room.delete(userId)
-
-
+    console.log(`User disconnected: ${userId}`);
+    if (!currentRoom) return;
+    const room = rooms.get(currentRoom);
+    if (!room) return;
+    room.delete(userId);
     room.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(
@@ -100,10 +94,9 @@ wss.on("connection", (socket) => {
         )
       }
     })
-
     if (room.size === 0) {
-        rooms.delete(currentRoom)
-        console.log(`Room deleted: ${currentRoom}`)
+      rooms.delete(currentRoom);
+      console.log(`Room deleted: ${currentRoom}`);
     }
   })
 })
