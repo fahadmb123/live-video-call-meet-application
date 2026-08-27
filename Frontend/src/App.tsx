@@ -1,26 +1,55 @@
 import { useEffect, useRef } from "react";
+import socket from "./ws/socket";
+
 
 function App() {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const peerRef = useRef<RTCPeerConnection | null>(null)
 
   useEffect(() => {
-    const getMedia = async () => {
+    const setupWebRTC = async () => {
       try {
+        
         const stream = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: true,
         });
 
+       
         if (videoRef.current) {
-          console.log(stream)
           videoRef.current.srcObject = stream
         }
-      } catch (error) {
-        console.error("Camera/Microphone error:", error)
-      }
-    };
 
-    getMedia()
+       
+        const peerConnection = new RTCPeerConnection()
+
+        peerRef.current = peerConnection
+
+        stream.getTracks().forEach((track) => {
+          peerConnection.addTrack(track, stream)
+        })
+
+        const offer = await peerConnection.createOffer()
+        await peerConnection.setLocalDescription(offer)
+        
+        socket.send(JSON.stringify({
+          type:"offer",
+          offer
+        }))
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    if (socket.readyState === WebSocket.OPEN){
+      setupWebRTC()
+    }else {
+      socket.onopen = setupWebRTC
+    }
+
+    return ()=>{
+      socket.onopen = null
+    }
   }, [])
 
   return (
