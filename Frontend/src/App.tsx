@@ -4,6 +4,7 @@ import socket from "./ws/socket";
 
 function App() {
   const videoRef = useRef<HTMLVideoElement>(null)
+  const remoteVideoRef = useRef<HTMLVideoElement>(null)
   const peerRef = useRef<RTCPeerConnection | null>(null)
 
   useEffect(() => {
@@ -20,6 +21,12 @@ function App() {
           videoRef.current.srcObject = stream
         }
         const peerConnection = new RTCPeerConnection()
+                peerConnection.ontrack = (event) => {
+          if (remoteVideoRef.current) {
+            remoteVideoRef.current.srcObject = event.streams[0]
+          }
+        }
+
         peerConnection.onicecandidate = (event) => {
           if (event.candidate) {
             socket.send(
@@ -105,14 +112,28 @@ function App() {
     <div>
       <h1>WebRTC Video Call</h1>
 
-      <video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        muted
-      />
+      <div>
+        <h2>My Video</h2>
+
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+        />
+      </div>
+
+      <div>
+        <h2>Remote Video</h2>
+
+        <video
+          ref={remoteVideoRef}
+          autoPlay
+          playsInline
+        />
+      </div>
     </div>
-  );
+  )
 }
 
 export default App;
