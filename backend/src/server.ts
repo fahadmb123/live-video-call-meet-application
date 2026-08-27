@@ -17,7 +17,9 @@ const wss = new WebSocketServer({ server })
 
 wss.on("connection", (socket) => {
   console.log("Client connected")
-
+  socket.on("message",(message)=>{
+    console.log("Message Recieved ",message)
+  })
   socket.on("close", () => {
     console.log("Client disconnected")
   })
