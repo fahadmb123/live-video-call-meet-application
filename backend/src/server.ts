@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import WebSocket from "ws";
 import { WebSocketServer } from "ws";
 
 const app = express()
@@ -14,13 +15,25 @@ const server = app.listen(PORT, () => {
 });
 
 const wss = new WebSocketServer({ server })
+const clients :WebSocket[] = []
+
 
 wss.on("connection", (socket) => {
   console.log("Client connected")
+  clients.push(socket)
+
   socket.on("message",(message)=>{
-    console.log("Message Recieved ",message)
+    clients.forEach(client=>{
+        if (client !== socket && client.readyState === WebSocket.OPEN){
+            client.send(message.toString())
+        }
+    })
   })
   socket.on("close", () => {
     console.log("Client disconnected")
+    const index = clients.indexOf(socket)
+    if (index !== -1){
+        clients.splice(index,1)
+    }
   })
 })

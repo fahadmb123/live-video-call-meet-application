@@ -19,9 +19,17 @@ function App() {
         if (videoRef.current) {
           videoRef.current.srcObject = stream
         }
-
-       
         const peerConnection = new RTCPeerConnection()
+        peerConnection.onicecandidate = (event) => {
+          if (event.candidate) {
+            socket.send(
+              JSON.stringify({
+                type: "ice-candidate",
+                candidate: event.candidate,
+              })
+            )
+          }
+        }
 
         peerRef.current = peerConnection
 
@@ -31,7 +39,48 @@ function App() {
 
         const offer = await peerConnection.createOffer()
         await peerConnection.setLocalDescription(offer)
-        
+
+
+        socket.onmessage = async (event)=>{
+          const message = JSON.parse(event.data)
+          if (message.type === "offer") {
+            const peerConnection = peerRef.current
+
+            if (!peerConnection) return
+
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(message.offer))
+            const answer = await peerConnection.createAnswer()
+            await peerConnection.setLocalDescription(answer)
+            socket.send(
+              JSON.stringify({
+                type: "answer",
+                answer,
+              })
+            )
+          }
+
+
+          if (message.type === "answer") {
+            const peerConnection = peerRef.current
+            if (!peerConnection) return
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(message.answer))
+            console.log("Answer received")
+          }
+
+
+          if (message.type === "ice-candidate") {
+            const peerConnection = peerRef.current;
+
+            if (!peerConnection) return;
+
+            await peerConnection.addIceCandidate(
+              new RTCIceCandidate(message.candidate)
+            );
+
+            console.log("ICE candidate added");
+          }
+        }
+
         socket.send(JSON.stringify({
           type:"offer",
           offer
