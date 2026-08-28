@@ -9,7 +9,8 @@ function App() {
   const peersRef = useRef<PeerMap>(new Map());
   const localStreamRef = useRef<MediaStream | null>(null);
   const pendingCandidatesRef = useRef<Map<string, RTCIceCandidate[]>>(new Map())
-  const [muted, setMuted] = useState(false);
+  const [muted, setMuted] = useState(false)
+  const [cameraOff, setCameraOff] = useState(false);
 
   const [roomId, setRoomId] = useState("");
   const [joined, setJoined] = useState(false);
@@ -21,12 +22,18 @@ function App() {
     const stream = localStreamRef.current
     if (!stream) return
 
-    const audioTrack = stream.getAudioTracks()[0];
+    const audioTrack = stream.getAudioTracks()[0]
     if (!audioTrack) return;
-
     audioTrack.enabled = !audioTrack.enabled
-
     setMuted(!audioTrack.enabled)
+  }
+  const toggleCamera = () => {
+    const stream = localStreamRef.current
+    if (!stream) return
+    const videoTrack = stream.getVideoTracks()[0]
+    if (!videoTrack) return
+    videoTrack.enabled = !videoTrack.enabled
+    setCameraOff(!videoTrack.enabled)
   }
 
 
@@ -387,6 +394,9 @@ function App() {
           <h3>My ID: {myUserId}</h3>
           <button onClick={toggleMute}>
             {muted ? "Unmute 🎤" : "Mute 🔇"}
+          </button>
+          <button onClick={toggleCamera}>
+            {cameraOff ? "Turn Camera On 📷" : "Turn Camera Off 📷"}
           </button>
           <h3>Remote Users: {remoteStreams.size}</h3>
 
