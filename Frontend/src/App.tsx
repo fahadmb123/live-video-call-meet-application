@@ -623,7 +623,7 @@ function App() {
           </header>
 
           <main className="meeting-content">
-            <section className="video-grid">
+            <section  className={`video-grid participants-${remoteUsers.size + 1}`}>
               <div className="video-card local-video-card">
                 <div className="video-wrapper">
                   <video

@@ -12,8 +12,15 @@
   background: #0b0d12;
 }
 
-body {
+html,
+body,
+#root {
+  width: 100%;
   min-width: 320px;
+  min-height: 100%;
+}
+
+body {
   min-height: 100vh;
   background: #0b0d12;
 }
@@ -28,13 +35,18 @@ button {
 }
 
 
-/* =========================
-   JOIN PAGE
-========================= */
+/* =====================================================
+   APP
+===================================================== */
 
 .app {
   min-height: 100vh;
 }
+
+
+/* =====================================================
+   JOIN PAGE
+===================================================== */
 
 .join-page {
   min-height: 100vh;
@@ -70,6 +82,11 @@ button {
   text-align: center;
 }
 
+
+/* =====================================================
+   LOGO
+===================================================== */
+
 .logo {
   display: flex;
   align-items: center;
@@ -100,8 +117,14 @@ button {
   font-weight: 800;
 }
 
+
+/* =====================================================
+   JOIN FORM
+===================================================== */
+
 .join-card h1 {
   font-size: 30px;
+
   margin-bottom: 10px;
 }
 
@@ -194,21 +217,23 @@ button {
 }
 
 
-/* =========================
+/* =====================================================
    MEETING PAGE
-========================= */
+===================================================== */
 
 .meeting-page {
   min-height: 100vh;
 
-  background: #0b0d12;
-
   display: flex;
   flex-direction: column;
+
+  background: #0b0d12;
 }
 
 
-/* HEADER */
+/* =====================================================
+   MEETING HEADER
+===================================================== */
 
 .meeting-header {
   height: 70px;
@@ -218,6 +243,8 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  flex-shrink: 0;
 
   border-bottom: 1px solid #202531;
 
@@ -275,6 +302,8 @@ button {
   width: 8px;
   height: 8px;
 
+  flex-shrink: 0;
+
   border-radius: 50%;
 
   background: #35d07f;
@@ -284,62 +313,246 @@ button {
 }
 
 
-/* =========================
-   VIDEO AREA
-========================= */
+/* =====================================================
+   MEETING CONTENT
+===================================================== */
 
 .meeting-content {
   flex: 1;
 
   width: 100%;
-
   max-width: 1400px;
 
   margin: 0 auto;
 
-  padding: 28px;
+  padding: 24px 28px 22px;
 
   display: flex;
   flex-direction: column;
 }
+
+
+/* =====================================================
+   VIDEO GRID
+===================================================== */
 
 .video-grid {
   width: 100%;
 
   display: grid;
 
-  grid-template-columns:
-    repeat(auto-fit, minmax(320px, 1fr));
-
-  gap: 18px;
+  gap: 16px;
 
   flex: 1;
+
+  align-content: center;
 }
+
+
+/* =====================================================
+   1 PARTICIPANT
+===================================================== */
+
+.participants-1 {
+  grid-template-columns: 1fr;
+
+  align-content: center;
+}
+
+.participants-1 .video-card {
+  width: 100%;
+
+  max-width: 1100px;
+
+  aspect-ratio: 16 / 9;
+
+  justify-self: center;
+}
+
+
+/* =====================================================
+   2 PARTICIPANTS
+===================================================== */
+
+.participants-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  align-content: center;
+}
+
+.participants-2 .video-card {
+  width: 100%;
+
+  aspect-ratio: 16 / 9;
+}
+
+
+/* =====================================================
+   3 PARTICIPANTS
+===================================================== */
+
+.participants-3 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  align-content: center;
+}
+
+/* First two */
+.participants-3 .video-card:nth-child(1),
+.participants-3 .video-card:nth-child(2) {
+  width: 100%;
+
+  aspect-ratio: 16 / 9;
+}
+
+/* Third video */
+.participants-3 .video-card:nth-child(3) {
+  grid-column: 1 / -1;
+
+  width: 50%;
+
+  aspect-ratio: 16 / 9;
+
+  justify-self: center;
+}
+
+
+/* =====================================================
+   4 PARTICIPANTS
+===================================================== */
+
+.participants-4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+
+  align-content: center;
+}
+
+.participants-4 .video-card {
+  width: 100%;
+
+  aspect-ratio: 1 / 1;
+}
+
+
+/* =====================================================
+   5 PARTICIPANTS
+===================================================== */
+
+.participants-5 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  align-content: center;
+}
+
+.participants-5 .video-card {
+  width: 100%;
+
+  aspect-ratio: 16 / 10;
+}
+
+/* Last two centered */
+.participants-5 .video-card:nth-child(4) {
+  grid-column: 1 / 2;
+
+  justify-self: end;
+
+  width: 100%;
+}
+
+.participants-5 .video-card:nth-child(5) {
+  grid-column: 2 / 3;
+
+  justify-self: start;
+
+  width: 100%;
+}
+
+
+/* =====================================================
+   6 PARTICIPANTS
+===================================================== */
+
+.participants-6 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  align-content: center;
+}
+
+.participants-6 .video-card {
+  width: 100%;
+
+  aspect-ratio: 16 / 10;
+}
+
+
+/* =====================================================
+   7+ PARTICIPANTS
+===================================================== */
+
+.participants-7,
+.participants-8,
+.participants-9,
+.participants-10,
+.participants-11,
+.participants-12 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  align-content: center;
+}
+
+.participants-7 .video-card,
+.participants-8 .video-card,
+.participants-9 .video-card,
+.participants-10 .video-card,
+.participants-11 .video-card,
+.participants-12 .video-card {
+  width: 100%;
+
+  aspect-ratio: 16 / 10;
+}
+
+
+/* =====================================================
+   VIDEO CARD
+===================================================== */
 
 .video-card {
   position: relative;
 
-  min-height: 260px;
-
-  border-radius: 16px;
+  min-width: 0;
 
   overflow: hidden;
 
   border: 1px solid #282e3b;
 
+  border-radius: 16px;
+
   background: #151922;
 
   box-shadow:
     0 12px 35px rgba(0, 0, 0, 0.25);
+
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
 }
+
+.video-card:hover {
+  border-color: #394256;
+}
+
+
+/* =====================================================
+   VIDEO WRAPPER
+===================================================== */
 
 .video-wrapper {
   position: relative;
 
   width: 100%;
   height: 100%;
-
-  min-height: 260px;
 }
 
 .video-wrapper video {
@@ -348,15 +561,15 @@ button {
   width: 100%;
   height: 100%;
 
-  min-height: 260px;
-
   object-fit: cover;
 
   background: #151922;
 }
 
 
-/* VIDEO NAME */
+/* =====================================================
+   VIDEO NAME
+===================================================== */
 
 .video-name {
   position: absolute;
@@ -395,14 +608,13 @@ button {
 }
 
 
-/* =========================
+/* =====================================================
    CONNECTING
-========================= */
+===================================================== */
 
 .connecting {
   width: 100%;
   height: 100%;
-  min-height: 260px;
 
   display: flex;
   flex-direction: column;
@@ -460,6 +672,7 @@ button {
   margin-top: 15px;
 
   border: 2px solid #343b4a;
+
   border-top-color: #4f7cff;
 
   border-radius: 50%;
@@ -474,9 +687,9 @@ button {
 }
 
 
-/* =========================
+/* =====================================================
    CONTROLS
-========================= */
+===================================================== */
 
 .controls {
   display: flex;
@@ -486,9 +699,11 @@ button {
 
   gap: 10px;
 
-  margin-top: 25px;
+  margin-top: 20px;
 
-  padding: 14px;
+  padding: 13px;
+
+  flex-shrink: 0;
 
   border: 1px solid #242a36;
 
@@ -501,6 +716,7 @@ button {
 .leave-button {
   display: flex;
   align-items: center;
+  justify-content: center;
 
   gap: 8px;
 
@@ -516,19 +732,26 @@ button {
   font-size: 13px;
   font-weight: 600;
 
-  transition: 0.2s;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .control-button:hover {
   background: #252b38;
 
   border-color: #414a5c;
+
+  transform: translateY(-1px);
 }
 
 .control-button.active {
   background: #2a1f27;
 
   border-color: #6d3b4d;
+
+  color: #ffb6c0;
 }
 
 .control-icon {
@@ -547,23 +770,117 @@ button {
   background: #55232e;
 
   border-color: #a44b5d;
+
+  transform: translateY(-1px);
 }
 
 
-/* =========================
+/* =====================================================
    TABLET
-========================= */
+===================================================== */
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
 
   .meeting-header {
     height: auto;
 
-    padding: 15px 18px;
+    min-height: 64px;
 
-    flex-wrap: wrap;
+    padding: 13px 18px;
 
     gap: 12px;
+  }
+
+  .meeting-content {
+    padding: 18px;
+  }
+
+
+  /* 1 user */
+
+  .participants-1 .video-card {
+    max-width: 100%;
+  }
+
+
+  /* 2 users */
+
+  .participants-2 {
+    grid-template-columns: 1fr;
+  }
+
+
+  /* 3 users */
+
+  .participants-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .participants-3 .video-card:nth-child(3) {
+    grid-column: auto;
+
+    width: 100%;
+  }
+
+
+  /* 4 users */
+
+  .participants-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+  }
+
+
+  /* 5+ */
+
+  .participants-5,
+  .participants-6,
+  .participants-7,
+  .participants-8,
+  .participants-9,
+  .participants-10,
+  .participants-11,
+  .participants-12 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .participants-5 .video-card:nth-child(4),
+  .participants-5 .video-card:nth-child(5) {
+    grid-column: auto;
+
+    width: 100%;
+
+    justify-self: stretch;
+  }
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
+
+  .join-page {
+    padding: 15px;
+  }
+
+  .join-card {
+    padding: 30px 22px;
+  }
+
+  .join-card h1 {
+    font-size: 25px;
+  }
+
+
+  /* HEADER */
+
+  .meeting-header {
+    padding: 12px 14px;
+
+    flex-wrap: wrap;
   }
 
   .brand {
@@ -578,47 +895,8 @@ button {
     order: 3;
   }
 
-  .meeting-content {
-    padding: 18px;
-  }
 
-  .video-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .video-card {
-    min-height: 230px;
-  }
-
-  .video-wrapper,
-  .video-wrapper video {
-    min-height: 230px;
-  }
-
-  .controls {
-    flex-wrap: wrap;
-  }
-
-}
-
-
-/* =========================
-   MOBILE
-========================= */
-
-@media (max-width: 500px) {
-
-  .join-page {
-    padding: 15px;
-  }
-
-  .join-card {
-    padding: 30px 22px;
-  }
-
-  .join-card h1 {
-    font-size: 25px;
-  }
+  /* CONTENT */
 
   .meeting-content {
     padding: 12px;
@@ -628,32 +906,124 @@ button {
     gap: 12px;
   }
 
-  .video-card {
-    min-height: 210px;
 
+  /* 2 users */
+
+  .participants-2 {
+    grid-template-columns: 1fr;
+  }
+
+
+  /* 3 users */
+
+  .participants-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .participants-3 .video-card:nth-child(3) {
+    width: 100%;
+  }
+
+
+  /* 4 users */
+
+  .participants-4 {
+    grid-template-columns: 1fr;
+
+    grid-template-rows: auto;
+  }
+
+  .participants-4 .video-card {
+    aspect-ratio: 16 / 9;
+  }
+
+
+  /* 5+ */
+
+  .participants-5,
+  .participants-6,
+  .participants-7,
+  .participants-8,
+  .participants-9,
+  .participants-10,
+  .participants-11,
+  .participants-12 {
+    grid-template-columns: 1fr;
+  }
+
+  .participants-5 .video-card,
+  .participants-6 .video-card,
+  .participants-7 .video-card,
+  .participants-8 .video-card,
+  .participants-9 .video-card,
+  .participants-10 .video-card,
+  .participants-11 .video-card,
+  .participants-12 .video-card {
+    aspect-ratio: 16 / 9;
+  }
+
+
+  /* VIDEO */
+
+  .video-card {
     border-radius: 12px;
   }
 
-  .video-wrapper,
-  .video-wrapper video {
-    min-height: 210px;
+  .video-name {
+    left: 8px;
+    bottom: 8px;
+
+    padding: 6px 9px;
+
+    font-size: 11px;
   }
 
+
+  /* CONTROLS */
+
   .controls {
+    margin-top: 12px;
+
     padding: 10px;
 
     gap: 7px;
+
+    flex-wrap: wrap;
   }
 
   .control-button,
   .leave-button {
     flex: 1;
 
-    justify-content: center;
+    min-width: 100px;
 
     padding: 10px 8px;
 
     font-size: 12px;
   }
+}
 
+
+/* =====================================================
+   VERY SMALL MOBILE
+===================================================== */
+
+@media (max-width: 380px) {
+
+  .meeting-header {
+    padding: 10px;
+  }
+
+  .meeting-content {
+    padding: 8px;
+  }
+
+  .controls {
+    flex-direction: column;
+  }
+
+  .control-button,
+  .leave-button {
+    width: 100%;
+  }
 }
