@@ -36,6 +36,24 @@ function App() {
     setCameraOff(!videoTrack.enabled)
   }
 
+  const leaveRoom = () => {
+    localStreamRef.current?.getTracks().forEach((track) => {
+      track.stop()
+    })
+    peersRef.current.forEach((peerConnection) => {
+      peerConnection.close()
+    })
+    peersRef.current.clear()
+    setRemoteStreams(new Map())
+    setJoined(false)
+    setMyUserId("")
+
+    socket.send(
+      JSON.stringify({
+        type: "leave-room",
+      })
+    )
+  }
 
 
   const sendMessage = (data: object) => {
@@ -397,6 +415,9 @@ function App() {
           </button>
           <button onClick={toggleCamera}>
             {cameraOff ? "Turn Camera On 📷" : "Turn Camera Off 📷"}
+          </button>
+          <button onClick={leaveRoom}>
+            Leave Room
           </button>
           <h3>Remote Users: {remoteStreams.size}</h3>
 

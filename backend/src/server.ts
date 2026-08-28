@@ -59,6 +59,32 @@ wss.on("connection", (socket) => {
       })
     }
 
+
+    if (data.type === "leave-room") {
+      if (!currentRoom) return
+      const room = rooms.get(currentRoom)
+
+      if (!room) return
+
+      room.delete(userId)
+      room.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(
+            JSON.stringify({
+              type: "user-left",
+              userId,
+            })
+          )
+        }
+      })
+      console.log(`${userId} left room: ${currentRoom}`)
+      if (room.size === 0) {
+        rooms.delete(currentRoom)
+        console.log(`Room deleted: ${currentRoom}`)
+      }
+      currentRoom = null
+    }
+
     if (data.type === "offer" || data.type === "answer" || data.type === "ice-candidate") {
       if (!currentRoom) return;
       const room = rooms.get(currentRoom);
