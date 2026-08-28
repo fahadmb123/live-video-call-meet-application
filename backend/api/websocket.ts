@@ -23,8 +23,6 @@ wss.on("connection", (socket) => {
   let muted = false;
   let cameraOff = false;
 
-  console.log(`User connected: ${userId}`);
-
   const leaveRoom = () => {
     if (!currentRoom) return;
 
@@ -196,7 +194,6 @@ wss.on("connection", (socket) => {
   });
 
   socket.on("close", () => {
-    console.log(`User disconnected: ${userId}`);
     leaveRoom();
   });
 });
