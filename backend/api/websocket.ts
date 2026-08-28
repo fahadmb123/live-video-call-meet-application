@@ -1,18 +1,4 @@
-import express from "express";
-import cors from "cors";
-import WebSocket from "ws";
-import { WebSocketServer } from "ws";
-
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-
-const server = app.listen(5000);
-
-const wss = new WebSocketServer({
-  server,
-});
+import { WebSocketServer, WebSocket } from "ws";
 
 type User = {
   socket: WebSocket;
@@ -21,71 +7,75 @@ type User = {
   cameraOff: boolean;
 };
 
-const rooms = new Map<
-  string,
-  Map<string, User>
->();
+const rooms = new Map<string, Map<string, User>>();
 
 const generateUserId = () => {
-  return Math.random()
-    .toString(36)
-    .substring(2, 9);
+  return Math.random().toString(36).substring(2, 9);
 };
+
+const wss = new WebSocketServer({ noServer: true });
 
 wss.on("connection", (socket) => {
   const userId = generateUserId();
 
-  console.log(
-    `User connected: ${userId}`
-  );
-
   let currentRoom: string | null = null;
   let username = "";
-
   let muted = false;
   let cameraOff = false;
 
+  console.log(`User connected: ${userId}`);
+
+  const leaveRoom = () => {
+    if (!currentRoom) return;
+
+    const room = rooms.get(currentRoom);
+
+    if (!room) return;
+
+    room.delete(userId);
+
+    room.forEach((user) => {
+      if (user.socket.readyState === WebSocket.OPEN) {
+        user.socket.send(
+          JSON.stringify({
+            type: "user-left",
+            userId,
+          })
+        );
+      }
+    });
+
+    if (room.size === 0) {
+      rooms.delete(currentRoom);
+    }
+
+    currentRoom = null;
+  };
+
   socket.on("message", (message) => {
     try {
-      const data = JSON.parse(
-        message.toString()
-      );
+      const data = JSON.parse(message.toString());
 
       if (data.type === "join-room") {
         const roomId = data.roomId;
 
         username = data.username;
-
         currentRoom = roomId;
 
         if (!rooms.has(roomId)) {
-          rooms.set(
-            roomId,
-            new Map()
-          );
+          rooms.set(roomId, new Map());
         }
 
-        const room =
-          rooms.get(roomId)!;
+        const room = rooms.get(roomId)!;
 
-        const existingUsers =
-          Array.from(
-            room.entries()
-          ).map(
-            ([
-              existingUserId,
-              user,
-            ]) => ({
-              userId:
-                existingUserId,
-              username:
-                user.username,
-              muted:
-                user.muted,
-              cameraOff:
-                user.cameraOff,
-            })
-          );
+        const existingUsers = Array.from(room.entries()).map(
+          ([existingUserId, user]) => ({
+            userId: existingUserId,
+            username: user.username,
+            muted: user.muted,
+            cameraOff: user.cameraOff,
+          })
+        );
 
         room.set(userId, {
           socket,
@@ -102,116 +92,69 @@ wss.on("connection", (socket) => {
             username,
             muted,
             cameraOff,
-            users:
-              existingUsers,
+            users: existingUsers,
           })
         );
 
-        room.forEach(
-          (
-            user,
-            existingUserId
-          ) => {
-            if (
-              existingUserId !==
-                userId &&
-              user.socket
-                .readyState ===
-                WebSocket.OPEN
-            ) {
-              user.socket.send(
-                JSON.stringify({
-                  type:
-                    "user-joined",
-                  userId,
-                  username,
-                  muted,
-                  cameraOff,
-                })
-              );
-            }
+        room.forEach((user, existingUserId) => {
+          if (
+            existingUserId !== userId &&
+            user.socket.readyState === WebSocket.OPEN
+          ) {
+            user.socket.send(
+              JSON.stringify({
+                type: "user-joined",
+                userId,
+                username,
+                muted,
+                cameraOff,
+              })
+            );
           }
-        );
+        });
 
         return;
       }
 
-      if (
-        data.type ===
-        "media-status"
-      ) {
-        if (!currentRoom) {
-          return;
+      if (data.type === "media-status") {
+        if (!currentRoom) return;
+
+        const room = rooms.get(currentRoom);
+
+        if (!room) return;
+
+        const currentUser = room.get(userId);
+
+        if (!currentUser) return;
+
+        if (typeof data.status?.muted === "boolean") {
+          muted = data.status.muted;
         }
 
-        const room =
-          rooms.get(
-            currentRoom
-          );
-
-        if (!room) {
-          return;
+        if (typeof data.status?.cameraOff === "boolean") {
+          cameraOff = data.status.cameraOff;
         }
 
-        const currentUser =
-          room.get(userId);
+        currentUser.muted = muted;
+        currentUser.cameraOff = cameraOff;
 
-        if (!currentUser) {
-          return;
-        }
-
-        if (
-          data.status &&
-          typeof data.status
-            .muted ===
-            "boolean"
-        ) {
-          muted =
-            data.status.muted;
-        }
-
-        if (
-          data.status &&
-          typeof data.status
-            .cameraOff ===
-            "boolean"
-        ) {
-          cameraOff =
-            data.status.cameraOff;
-        }
-
-        currentUser.muted =
-          muted;
-
-        currentUser.cameraOff =
-          cameraOff;
-
-        room.forEach(
-          (
-            user,
-            existingUserId
-          ) => {
-            if (
-              existingUserId !==
-                userId &&
-              user.socket
-                .readyState ===
-                WebSocket.OPEN
-            ) {
-              user.socket.send(
-                JSON.stringify({
-                  type:
-                    "media-status",
-                  from: userId,
-                  status: {
-                    muted,
-                    cameraOff,
-                  },
-                })
-              );
-            }
+        room.forEach((user, existingUserId) => {
+          if (
+            existingUserId !== userId &&
+            user.socket.readyState === WebSocket.OPEN
+          ) {
+            user.socket.send(
+              JSON.stringify({
+                type: "media-status",
+                from: userId,
+                status: {
+                  muted,
+                  cameraOff,
+                },
+              })
+            );
           }
-        );
+        });
 
         return;
       }
@@ -219,32 +162,19 @@ wss.on("connection", (socket) => {
       if (
         data.type === "offer" ||
         data.type === "answer" ||
-        data.type ===
-          "ice-candidate"
+        data.type === "ice-candidate"
       ) {
-        if (!currentRoom) {
-          return;
-        }
+        if (!currentRoom) return;
 
-        const room =
-          rooms.get(
-            currentRoom
-          );
+        const room = rooms.get(currentRoom);
 
-        if (!room) {
-          return;
-        }
+        if (!room) return;
 
-        const targetUser =
-          room.get(
-            data.target
-          );
+        const targetUser = room.get(data.target);
 
         if (
           targetUser &&
-          targetUser.socket
-            .readyState ===
-            WebSocket.OPEN
+          targetUser.socket.readyState === WebSocket.OPEN
         ) {
           targetUser.socket.send(
             JSON.stringify({
@@ -257,72 +187,18 @@ wss.on("connection", (socket) => {
         return;
       }
 
-      if (
-        data.type ===
-        "leave-room"
-      ) {
+      if (data.type === "leave-room") {
         leaveRoom();
-
-        return;
       }
     } catch (error) {
-      console.error(
-        "WebSocket message error:",
-        error
-      );
+      console.error("WebSocket message error:", error);
     }
   });
 
-  const leaveRoom = () => {
-    if (!currentRoom) {
-      return;
-    }
-
-    const room =
-      rooms.get(
-        currentRoom
-      );
-
-    if (!room) {
-      return;
-    }
-
-    room.delete(userId);
-
-    room.forEach(
-      (user) => {
-        if (
-          user.socket
-            .readyState ===
-          WebSocket.OPEN
-        ) {
-          user.socket.send(
-            JSON.stringify({
-              type:
-                "user-left",
-              userId,
-            })
-          );
-        }
-      }
-    );
-
-    if (room.size === 0) {
-      rooms.delete(
-        currentRoom
-      );
-    }
-
-    currentRoom = null;
-  };
-
   socket.on("close", () => {
-    console.log(
-      `User disconnected: ${userId}`
-    );
-
+    console.log(`User disconnected: ${userId}`);
     leaveRoom();
   });
 });
 
-export default app;
+export default wss;

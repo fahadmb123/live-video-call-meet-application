@@ -1,4 +1,4 @@
-const socket = new WebSocket("wss://meet-video-call-backend.vercel.app/api/websocket");
+const socket = new WebSocket("wss://meet-video-call-backend-three.vercel.app/api/websocket");
 
 socket.onopen = () => {
   console.log("WebSocket connected");
