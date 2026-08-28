@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import socket from "./ws/socket";
-import "./App.css"
+import "./App.css";
+
 type PeerMap = Map<string, RTCPeerConnection>;
 
 type RemoteUser = {
   username: string;
   stream?: MediaStream;
+  muted: boolean;
+  cameraOff: boolean;
 };
 
 function App() {
@@ -63,14 +66,9 @@ function App() {
     }
 
     peerConnection.ontrack = (event) => {
-      console.log("REMOTE TRACK RECEIVED:", userId);
-
       const stream = event.streams[0];
 
-      if (!stream) {
-        console.log("No remote stream received");
-        return;
-      }
+      if (!stream) return;
 
       setRemoteUsers((previous) => {
         const updated = new Map(previous);
@@ -91,20 +89,11 @@ function App() {
     peerConnection.onicecandidate = (event) => {
       if (!event.candidate) return;
 
-      console.log("Sending ICE candidate to:", userId);
-
       sendMessage({
         type: "ice-candidate",
         candidate: event.candidate,
         target: userId,
       });
-    };
-
-    peerConnection.oniceconnectionstatechange = () => {
-      console.log(
-        `ICE state ${userId}:`,
-        peerConnection.iceConnectionState
-      );
     };
 
     peerConnection.onconnectionstatechange = () => {
@@ -143,15 +132,11 @@ function App() {
 
   const createOffer = async (userId: string) => {
     try {
-      console.log("Creating offer for:", userId);
-
       const peerConnection = createPeerConnection(userId);
 
       const offer = await peerConnection.createOffer();
 
       await peerConnection.setLocalDescription(offer);
-
-      console.log("Sending offer to:", userId);
 
       sendMessage({
         type: "offer",
@@ -172,18 +157,11 @@ function App() {
 
     if (!candidates) return;
 
-    console.log(
-      `Adding ${candidates.length} queued ICE candidates from ${userId}`
-    );
-
     for (const candidate of candidates) {
       try {
         await peerConnection.addIceCandidate(candidate);
       } catch (error) {
-        console.error(
-          "Queued ICE candidate error:",
-          error
-        );
+        console.error("ICE queue error:", error);
       }
     }
 
@@ -191,8 +169,15 @@ function App() {
   };
 
   const joinRoom = async () => {
-    if (!roomId.trim()) return;
-    if (!username.trim()) return;
+    if (!roomId.trim()) {
+      alert("Please enter a room ID");
+      return;
+    }
+
+    if (!username.trim()) {
+      alert("Please enter your name");
+      return;
+    }
 
     try {
       const stream =
@@ -210,10 +195,6 @@ function App() {
         roomId: roomId.trim(),
         username: username.trim(),
       });
-
-      console.log(
-        `Joining room ${roomId.trim()} as ${username.trim()}`
-      );
     } catch (error) {
       console.error(
         "Camera/microphone error:",
@@ -233,7 +214,16 @@ function App() {
 
     audioTrack.enabled = !audioTrack.enabled;
 
-    setMuted(!audioTrack.enabled);
+    const isMuted = !audioTrack.enabled;
+
+    setMuted(isMuted);
+
+    sendMessage({
+      type: "media-status",
+      status: {
+        muted: isMuted,
+      },
+    });
   };
 
   const toggleCamera = () => {
@@ -247,7 +237,16 @@ function App() {
 
     videoTrack.enabled = !videoTrack.enabled;
 
-    setCameraOff(!videoTrack.enabled);
+    const isCameraOff = !videoTrack.enabled;
+
+    setCameraOff(isCameraOff);
+
+    sendMessage({
+      type: "media-status",
+      status: {
+        cameraOff: isCameraOff,
+      },
+    });
   };
 
   const leaveRoom = () => {
@@ -274,6 +273,8 @@ function App() {
     setRemoteUsers(new Map());
     setJoined(false);
     setMyUserId("");
+    setMuted(false);
+    setCameraOff(false);
   };
 
   useEffect(() => {
@@ -301,20 +302,9 @@ function App() {
         );
 
         if (message.type === "room-joined") {
-          console.log(
-            "ROOM JOINED:",
-            message.username,
-            message.userId
-          );
-
           setMyUserId(message.userId);
 
           const users = message.users || [];
-
-          console.log(
-            "EXISTING USERS:",
-            users
-          );
 
           for (const user of users) {
             if (user.userId === message.userId) {
@@ -326,6 +316,8 @@ function App() {
 
               updated.set(user.userId, {
                 username: user.username,
+                muted: false,
+                cameraOff: false,
               });
 
               return updated;
@@ -338,15 +330,13 @@ function App() {
         }
 
         if (message.type === "user-joined") {
-          console.log(
-            `${message.username} joined`
-          );
-
           setRemoteUsers((previous) => {
             const updated = new Map(previous);
 
             updated.set(message.userId, {
               username: message.username,
+              muted: false,
+              cameraOff: false,
             });
 
             return updated;
@@ -358,10 +348,7 @@ function App() {
         if (message.type === "offer") {
           const userId = message.from;
 
-          console.log(
-            "OFFER RECEIVED FROM:",
-            userId
-          );
+          if (!userId) return;
 
           const peerConnection =
             createPeerConnection(userId);
@@ -370,11 +357,6 @@ function App() {
             new RTCSessionDescription(
               message.offer
             )
-          );
-
-          console.log(
-            "Remote offer description set:",
-            userId
           );
 
           await addPendingCandidates(
@@ -389,11 +371,6 @@ function App() {
             answer
           );
 
-          console.log(
-            "SENDING ANSWER TO:",
-            userId
-          );
-
           sendMessage({
             type: "answer",
             answer: peerConnection.localDescription,
@@ -406,31 +383,17 @@ function App() {
         if (message.type === "answer") {
           const userId = message.from;
 
-          console.log(
-            "ANSWER RECEIVED FROM:",
-            userId
-          );
+          if (!userId) return;
 
           const peerConnection =
             peersRef.current.get(userId);
 
-          if (!peerConnection) {
-            console.log(
-              "No peer for answer:",
-              userId
-            );
-            return;
-          }
+          if (!peerConnection) return;
 
           await peerConnection.setRemoteDescription(
             new RTCSessionDescription(
               message.answer
             )
-          );
-
-          console.log(
-            "Remote answer description set:",
-            userId
           );
 
           await addPendingCandidates(
@@ -444,10 +407,7 @@ function App() {
         if (message.type === "ice-candidate") {
           const userId = message.from;
 
-          console.log(
-            "ICE RECEIVED FROM:",
-            userId
-          );
+          if (!userId) return;
 
           const candidate =
             new RTCIceCandidate(
@@ -474,25 +434,13 @@ function App() {
 
             candidates.push(candidate);
 
-            console.log(
-              "ICE queued:",
-              userId
-            );
-
             return;
           }
 
-          if (
-            peerConnection.remoteDescription
-          ) {
+          if (peerConnection.remoteDescription) {
             try {
               await peerConnection.addIceCandidate(
                 candidate
-              );
-
-              console.log(
-                "ICE candidate added:",
-                userId
               );
             } catch (error) {
               console.error(
@@ -516,22 +464,43 @@ function App() {
             }
 
             candidates.push(candidate);
-
-            console.log(
-              "ICE queued because remote description is missing:",
-              userId
-            );
           }
 
           return;
         }
 
-        if (message.type === "user-left") {
-          console.log(
-            "USER LEFT:",
-            message.userId
-          );
+        if (message.type === "media-status") {
+          const userId = message.from;
 
+          if (!userId) return;
+
+          setRemoteUsers((previous) => {
+            const updated = new Map(previous);
+
+            const existingUser =
+              updated.get(userId);
+
+            if (!existingUser) {
+              return previous;
+            }
+
+            updated.set(userId, {
+              ...existingUser,
+              muted:
+                message.status?.muted ??
+                existingUser.muted,
+              cameraOff:
+                message.status?.cameraOff ??
+                existingUser.cameraOff,
+            });
+
+            return updated;
+          });
+
+          return;
+        }
+
+        if (message.type === "user-left") {
           removePeer(message.userId);
 
           return;
@@ -569,12 +538,9 @@ function App() {
 
   return (
     <div className="app">
-
       {!joined && (
         <div className="join-page">
-
           <div className="join-card">
-
             <div className="logo">
               <div className="logo-icon">M</div>
               <span>MeetSpace</span>
@@ -583,7 +549,8 @@ function App() {
             <h1>Join a Meeting</h1>
 
             <p className="join-description">
-              Connect with your team and start a video conversation.
+              Connect with your team and start a
+              video conversation.
             </p>
 
             <div className="form-group">
@@ -620,22 +587,18 @@ function App() {
             </button>
 
             <p className="join-footer">
-              Enter the same room ID to meet with others.
+              Enter the same room ID to meet with
+              others.
             </p>
-
           </div>
-
         </div>
       )}
 
       {joined && (
         <div className="meeting-page">
-
           <header className="meeting-header">
-
             <div className="brand">
               <div className="logo-icon">M</div>
-
               <span>MeetSpace</span>
             </div>
 
@@ -653,20 +616,16 @@ function App() {
               <span className="status-dot"></span>
 
               {remoteUsers.size + 1} participant
-              {remoteUsers.size + 1 !== 1 ? "s" : ""}
+              {remoteUsers.size + 1 !== 1
+                ? "s"
+                : ""}
             </div>
-
           </header>
 
-
           <main className="meeting-content">
-
             <section className="video-grid">
-
               <div className="video-card local-video-card">
-
                 <div className="video-wrapper">
-
                   <video
                     ref={videoRef}
                     autoPlay
@@ -680,90 +639,84 @@ function App() {
                     </span>
 
                     {username}
+
                     <span className="you-label">
                       You
                     </span>
                   </div>
-
                 </div>
-
               </div>
 
+              {Array.from(
+                remoteUsers.entries()
+              ).map(([userId, user]) => {
+                const stream = user.stream;
 
-              {Array.from(remoteUsers.entries()).map(
-                ([userId, user]) => {
+                return (
+                  <div
+                    className="video-card"
+                    key={userId}
+                  >
+                    <div className="video-wrapper">
+                      {stream && !user.cameraOff ? (
+                        <video
+                          autoPlay
+                          playsInline
+                          ref={(video) => {
+                            if (
+                              video &&
+                              video.srcObject !==
+                                stream
+                            ) {
+                              video.srcObject =
+                                stream;
+                            }
+                          }}
+                        />
+                      ) : (
+                        <div className="connecting">
+                          <div className="avatar">
+                            {user.username
+                              .charAt(0)
+                              .toUpperCase()}
+                          </div>
 
-                  const stream = user.stream;
+                          <div className="connecting-name">
+                            {user.username}
+                          </div>
 
-                  return (
-                    <div
-                      className="video-card"
-                      key={userId}
-                    >
-
-                      <div className="video-wrapper">
-
-                        {stream ? (
-                          <video
-                            autoPlay
-                            playsInline
-                            ref={(video) => {
-
-                              if (
-                                video &&
-                                stream &&
-                                video.srcObject !== stream
-                              ) {
-                                video.srcObject = stream;
-                              }
-
-                            }}
-                          />
-                        ) : (
-                          <div className="connecting">
-
-                            <div className="avatar">
-                              {user.username
-                                .charAt(0)
-                                .toUpperCase()}
-                            </div>
-
-                            <div className="connecting-name">
-                              {user.username}
-                            </div>
-
+                          {!stream ? (
                             <div className="connecting-text">
                               Connecting...
                             </div>
+                          ) : (
+                            <div className="connecting-text">
+                              Camera Off
+                            </div>
+                          )}
 
+                          {!stream && (
                             <div className="loader"></div>
-
-                          </div>
-                        )}
-
-                        <div className="video-name">
-
-                          <span className="mic-status">
-                            🎤
-                          </span>
-
-                          {user.username}
-
+                          )}
                         </div>
+                      )}
 
+                      <div className="video-name">
+                        <span className="mic-status">
+                          {user.muted
+                            ? "🔇"
+                            : "🎤"}
+                        </span>
+
+                        {user.username}
                       </div>
-
                     </div>
-                  );
-
-                }
-              )}
-
+                  </div>
+                );
+              })}
             </section>
 
-
             <section className="controls">
-
               <button
                 className={`control-button ${
                   muted ? "active" : ""
@@ -778,7 +731,6 @@ function App() {
                   {muted ? "Unmute" : "Mute"}
                 </span>
               </button>
-
 
               <button
                 className={`control-button ${
@@ -797,7 +749,6 @@ function App() {
                 </span>
               </button>
 
-
               <button
                 className="leave-button"
                 onClick={leaveRoom}
@@ -808,14 +759,10 @@ function App() {
 
                 Leave Room
               </button>
-
             </section>
-
           </main>
-
         </div>
       )}
-
     </div>
   );
 }
