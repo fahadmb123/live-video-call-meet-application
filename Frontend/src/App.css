@@ -1,184 +1,659 @@
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
-
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-.hero {
-  position: relative;
+:root {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
 
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
+  color: #ffffff;
+  background: #0b0d12;
 }
 
-#center {
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  background: #0b0d12;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+
+/* =========================
+   JOIN PAGE
+========================= */
+
+.app {
+  min-height: 100vh;
+}
+
+.join-page {
+  min-height: 100vh;
+
   display: flex;
-  flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
+  align-items: center;
+  justify-content: center;
 
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
+  padding: 24px;
+
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      #1d2538 0%,
+      #0b0d12 55%
+    );
 }
 
-#next-steps {
+.join-card {
+  width: 100%;
+  max-width: 440px;
+
+  padding: 42px;
+
+  border: 1px solid #252b38;
+  border-radius: 22px;
+
+  background: rgba(19, 22, 30, 0.95);
+
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.45);
+
+  text-align: center;
+}
+
+.logo {
   display: flex;
-  border-top: 1px solid var(--border);
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  margin-bottom: 34px;
+
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.logo-icon {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: #4f7cff;
+
+  color: white;
+
+  font-weight: 800;
+}
+
+.join-card h1 {
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+.join-description {
+  color: #8e96a8;
+
+  font-size: 14px;
+
+  line-height: 1.6;
+
+  margin-bottom: 30px;
+}
+
+.form-group {
   text-align: left;
 
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
+  margin-bottom: 18px;
 }
 
-#docs {
-  border-right: 1px solid var(--border);
+.form-group label {
+  display: block;
 
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
+  margin-bottom: 8px;
+
+  color: #c7ccd7;
+
+  font-size: 13px;
+  font-weight: 600;
 }
 
-#next-steps ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 8px;
-  margin: 32px 0 0;
-
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
-}
-
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
-}
-
-.ticks {
-  position: relative;
+.form-group input {
   width: 100%;
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
+  padding: 14px 15px;
+
+  border: 1px solid #303746;
+  border-radius: 10px;
+
+  outline: none;
+
+  background: #10131a;
+
+  color: white;
+
+  transition: 0.2s;
+}
+
+.form-group input::placeholder {
+  color: #646c7c;
+}
+
+.form-group input:focus {
+  border-color: #4f7cff;
+
+  box-shadow:
+    0 0 0 3px rgba(79, 124, 255, 0.12);
+}
+
+.join-button {
+  width: 100%;
+
+  margin-top: 8px;
+
+  padding: 14px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #4f7cff;
+
+  color: white;
+
+  font-weight: 700;
+
+  transition: 0.2s;
+}
+
+.join-button:hover {
+  background: #638cff;
+
+  transform: translateY(-1px);
+}
+
+.join-footer {
+  margin-top: 22px;
+
+  color: #626a7a;
+
+  font-size: 12px;
+}
+
+
+/* =========================
+   MEETING PAGE
+========================= */
+
+.meeting-page {
+  min-height: 100vh;
+
+  background: #0b0d12;
+
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* HEADER */
+
+.meeting-header {
+  height: 70px;
+
+  padding: 0 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border-bottom: 1px solid #202531;
+
+  background: #10131a;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.room-info {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.room-label {
+  color: #727b8e;
+
+  font-size: 13px;
+}
+
+.room-id {
+  padding: 5px 10px;
+
+  border-radius: 7px;
+
+  background: #1c2230;
+
+  color: #dce2ef;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.participant-count {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  color: #8e96a8;
+
+  font-size: 13px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+
+  border-radius: 50%;
+
+  background: #35d07f;
+
+  box-shadow:
+    0 0 8px rgba(53, 208, 127, 0.6);
+}
+
+
+/* =========================
+   VIDEO AREA
+========================= */
+
+.meeting-content {
+  flex: 1;
+
+  width: 100%;
+
+  max-width: 1400px;
+
+  margin: 0 auto;
+
+  padding: 28px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.video-grid {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(320px, 1fr));
+
+  gap: 18px;
+
+  flex: 1;
+}
+
+.video-card {
+  position: relative;
+
+  min-height: 260px;
+
+  border-radius: 16px;
+
+  overflow: hidden;
+
+  border: 1px solid #282e3b;
+
+  background: #151922;
+
+  box-shadow:
+    0 12px 35px rgba(0, 0, 0, 0.25);
+}
+
+.video-wrapper {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  min-height: 260px;
+}
+
+.video-wrapper video {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  min-height: 260px;
+
+  object-fit: cover;
+
+  background: #151922;
+}
+
+
+/* VIDEO NAME */
+
+.video-name {
+  position: absolute;
+
+  left: 12px;
+  bottom: 12px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  padding: 7px 11px;
+
+  border-radius: 8px;
+
+  background: rgba(0, 0, 0, 0.65);
+
+  backdrop-filter: blur(8px);
+
+  color: white;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.you-label {
+  color: #8faaff;
+
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.mic-status {
+  font-size: 12px;
+}
+
+
+/* =========================
+   CONNECTING
+========================= */
+
+.connecting {
+  width: 100%;
+  height: 100%;
+  min-height: 260px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  background:
+    radial-gradient(
+      circle at center,
+      #1c2230 0%,
+      #12151c 70%
+    );
+}
+
+.avatar {
+  width: 65px;
+  height: 65px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 14px;
+
+  border-radius: 50%;
+
+  background: #4f7cff;
+
+  color: white;
+
+  font-size: 25px;
+  font-weight: 700;
+}
+
+.connecting-name {
+  color: #ffffff;
+
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.connecting-text {
+  margin-top: 6px;
+
+  color: #717a8d;
+
+  font-size: 13px;
+}
+
+.loader {
+  width: 18px;
+  height: 18px;
+
+  margin-top: 15px;
+
+  border: 2px solid #343b4a;
+  border-top-color: #4f7cff;
+
+  border-radius: 50%;
+
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================
+   CONTROLS
+========================= */
+
+.controls {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  margin-top: 25px;
+
+  padding: 14px;
+
+  border: 1px solid #242a36;
+
+  border-radius: 15px;
+
+  background: #11141b;
+}
+
+.control-button,
+.leave-button {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 11px 16px;
+
+  border: 1px solid #303746;
+  border-radius: 9px;
+
+  background: #1a1f29;
+
+  color: #dce1ea;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  transition: 0.2s;
+}
+
+.control-button:hover {
+  background: #252b38;
+
+  border-color: #414a5c;
+}
+
+.control-button.active {
+  background: #2a1f27;
+
+  border-color: #6d3b4d;
+}
+
+.control-icon {
+  font-size: 14px;
+}
+
+.leave-button {
+  border-color: #713743;
+
+  background: #401e27;
+
+  color: #ffb6c0;
+}
+
+.leave-button:hover {
+  background: #55232e;
+
+  border-color: #a44b5d;
+}
+
+
+/* =========================
+   TABLET
+========================= */
+
+@media (max-width: 768px) {
+
+  .meeting-header {
+    height: auto;
+
+    padding: 15px 18px;
+
+    flex-wrap: wrap;
+
+    gap: 12px;
   }
 
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
+  .brand {
+    width: 100%;
   }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
+
+  .room-info {
+    order: 2;
   }
+
+  .participant-count {
+    order: 3;
+  }
+
+  .meeting-content {
+    padding: 18px;
+  }
+
+  .video-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .video-card {
+    min-height: 230px;
+  }
+
+  .video-wrapper,
+  .video-wrapper video {
+    min-height: 230px;
+  }
+
+  .controls {
+    flex-wrap: wrap;
+  }
+
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 500px) {
+
+  .join-page {
+    padding: 15px;
+  }
+
+  .join-card {
+    padding: 30px 22px;
+  }
+
+  .join-card h1 {
+    font-size: 25px;
+  }
+
+  .meeting-content {
+    padding: 12px;
+  }
+
+  .video-grid {
+    gap: 12px;
+  }
+
+  .video-card {
+    min-height: 210px;
+
+    border-radius: 12px;
+  }
+
+  .video-wrapper,
+  .video-wrapper video {
+    min-height: 210px;
+  }
+
+  .controls {
+    padding: 10px;
+
+    gap: 7px;
+  }
+
+  .control-button,
+  .leave-button {
+    flex: 1;
+
+    justify-content: center;
+
+    padding: 10px 8px;
+
+    font-size: 12px;
+  }
+
 }

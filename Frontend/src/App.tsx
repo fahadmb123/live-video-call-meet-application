@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import socket from "./ws/socket";
-
+import "./App.css"
 type PeerMap = Map<string, RTCPeerConnection>;
 
 type RemoteUser = {
@@ -568,107 +568,255 @@ function App() {
   }, []);
 
   return (
-    <>
+    <div className="app">
+
       {!joined && (
-        <div>
-          <h2>Join Room</h2>
+        <div className="join-page">
 
-          <input
-            type="text"
-            placeholder="Enter your name"
-            value={username}
-            onChange={(event) =>
-              setUsername(event.target.value)
-            }
-          />
+          <div className="join-card">
 
-          <br />
+            <div className="logo">
+              <div className="logo-icon">M</div>
+              <span>MeetSpace</span>
+            </div>
 
-          <input
-            type="text"
-            placeholder="Enter Room ID"
-            value={roomId}
-            onChange={(event) =>
-              setRoomId(event.target.value)
-            }
-          />
+            <h1>Join a Meeting</h1>
 
-          <br />
+            <p className="join-description">
+              Connect with your team and start a video conversation.
+            </p>
 
-          <button onClick={joinRoom}>
-            Join Room
-          </button>
+            <div className="form-group">
+              <label>Your Name</label>
+
+              <input
+                type="text"
+                placeholder="Enter your name"
+                value={username}
+                onChange={(event) =>
+                  setUsername(event.target.value)
+                }
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Room ID</label>
+
+              <input
+                type="text"
+                placeholder="Enter room ID"
+                value={roomId}
+                onChange={(event) =>
+                  setRoomId(event.target.value)
+                }
+              />
+            </div>
+
+            <button
+              className="join-button"
+              onClick={joinRoom}
+            >
+              Join Room
+            </button>
+
+            <p className="join-footer">
+              Enter the same room ID to meet with others.
+            </p>
+
+          </div>
+
         </div>
       )}
 
       {joined && (
-        <div>
-          <h2>Room: {roomId}</h2>
+        <div className="meeting-page">
 
-          <h3>
-            My Video - {username}
-          </h3>
+          <header className="meeting-header">
 
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            width="400"
-          />
+            <div className="brand">
+              <div className="logo-icon">M</div>
 
-          <h3>
-            My ID: {myUserId}
-          </h3>
-
-          <button onClick={toggleMute}>
-            {muted ? "Unmute 🎤" : "Mute 🔇"}
-          </button>
-
-          <button onClick={toggleCamera}>
-            {cameraOff
-              ? "Turn Camera On 📷"
-              : "Turn Camera Off 📷"}
-          </button>
-
-          <button onClick={leaveRoom}>
-            Leave Room
-          </button>
-
-          <h3>
-            Remote Users: {remoteUsers.size}
-          </h3>
-
-          {Array.from(
-            remoteUsers.entries()
-          ).map(([userId, user]) => (
-            <div key={userId}>
-              <h3>{user.username}</h3>
-
-              {user.stream ? (
-                <video
-                  autoPlay
-                  playsInline
-                  width="400"
-                  ref={(video) => {
-                    if (
-                      video &&
-                      video.srcObject !==
-                        user.stream
-                    ) {
-                      video.srcObject =
-                        user.stream!;
-                    }
-                  }}
-                />
-              ) : (
-                <p>Connecting...</p>
-              )}
+              <span>MeetSpace</span>
             </div>
-          ))}
+
+            <div className="room-info">
+              <span className="room-label">
+                Room
+              </span>
+
+              <span className="room-id">
+                {roomId}
+              </span>
+            </div>
+
+            <div className="participant-count">
+              <span className="status-dot"></span>
+
+              {remoteUsers.size + 1} participant
+              {remoteUsers.size + 1 !== 1 ? "s" : ""}
+            </div>
+
+          </header>
+
+
+          <main className="meeting-content">
+
+            <section className="video-grid">
+
+              <div className="video-card local-video-card">
+
+                <div className="video-wrapper">
+
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                  />
+
+                  <div className="video-name">
+                    <span className="mic-status">
+                      {muted ? "🔇" : "🎤"}
+                    </span>
+
+                    {username}
+                    <span className="you-label">
+                      You
+                    </span>
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              {Array.from(remoteUsers.entries()).map(
+                ([userId, user]) => {
+
+                  const stream = user.stream;
+
+                  return (
+                    <div
+                      className="video-card"
+                      key={userId}
+                    >
+
+                      <div className="video-wrapper">
+
+                        {stream ? (
+                          <video
+                            autoPlay
+                            playsInline
+                            ref={(video) => {
+
+                              if (
+                                video &&
+                                stream &&
+                                video.srcObject !== stream
+                              ) {
+                                video.srcObject = stream;
+                              }
+
+                            }}
+                          />
+                        ) : (
+                          <div className="connecting">
+
+                            <div className="avatar">
+                              {user.username
+                                .charAt(0)
+                                .toUpperCase()}
+                            </div>
+
+                            <div className="connecting-name">
+                              {user.username}
+                            </div>
+
+                            <div className="connecting-text">
+                              Connecting...
+                            </div>
+
+                            <div className="loader"></div>
+
+                          </div>
+                        )}
+
+                        <div className="video-name">
+
+                          <span className="mic-status">
+                            🎤
+                          </span>
+
+                          {user.username}
+
+                        </div>
+
+                      </div>
+
+                    </div>
+                  );
+
+                }
+              )}
+
+            </section>
+
+
+            <section className="controls">
+
+              <button
+                className={`control-button ${
+                  muted ? "active" : ""
+                }`}
+                onClick={toggleMute}
+              >
+                <span className="control-icon">
+                  {muted ? "🔇" : "🎤"}
+                </span>
+
+                <span>
+                  {muted ? "Unmute" : "Mute"}
+                </span>
+              </button>
+
+
+              <button
+                className={`control-button ${
+                  cameraOff ? "active" : ""
+                }`}
+                onClick={toggleCamera}
+              >
+                <span className="control-icon">
+                  {cameraOff ? "📷" : "📹"}
+                </span>
+
+                <span>
+                  {cameraOff
+                    ? "Turn Camera On"
+                    : "Turn Camera Off"}
+                </span>
+              </button>
+
+
+              <button
+                className="leave-button"
+                onClick={leaveRoom}
+              >
+                <span className="control-icon">
+                  ☎
+                </span>
+
+                Leave Room
+              </button>
+
+            </section>
+
+          </main>
+
         </div>
       )}
-    </>
+
+    </div>
   );
 }
 
