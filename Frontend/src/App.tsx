@@ -8,14 +8,28 @@ function App() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const peersRef = useRef<PeerMap>(new Map());
   const localStreamRef = useRef<MediaStream | null>(null);
-  const pendingCandidatesRef = useRef<Map<string, RTCIceCandidate[]>>(
-    new Map()
-  );
+  const pendingCandidatesRef = useRef<Map<string, RTCIceCandidate[]>>(new Map())
+  const [muted, setMuted] = useState(false);
 
   const [roomId, setRoomId] = useState("");
   const [joined, setJoined] = useState(false);
   const [myUserId, setMyUserId] = useState("");
-  const [remoteStreams, setRemoteStreams] = useState<StreamMap>(new Map());
+  const [remoteStreams, setRemoteStreams] = useState<StreamMap>(new Map())
+
+
+  const toggleMute = () => {
+    const stream = localStreamRef.current
+    if (!stream) return
+
+    const audioTrack = stream.getAudioTracks()[0];
+    if (!audioTrack) return;
+
+    audioTrack.enabled = !audioTrack.enabled
+
+    setMuted(!audioTrack.enabled)
+  }
+
+
 
   const sendMessage = (data: object) => {
     if (socket.readyState === WebSocket.OPEN) {
@@ -371,7 +385,9 @@ function App() {
           />
 
           <h3>My ID: {myUserId}</h3>
-
+          <button onClick={toggleMute}>
+            {muted ? "Unmute 🎤" : "Mute 🔇"}
+          </button>
           <h3>Remote Users: {remoteStreams.size}</h3>
 
           <div>
