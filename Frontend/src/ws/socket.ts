@@ -1,15 +1,15 @@
-const socket = new WebSocket("ws://localhost:5000")
+const socket = new WebSocket("wss://meet-video-call-backend.vercel.app/api/websocket");
 
 socket.onopen = () => {
-  console.log("WebSocket connected")
-}
+  console.log("WebSocket connected");
+};
 
 socket.onclose = () => {
-  console.log("WebSocket disconnected")
-}
+  console.log("WebSocket disconnected");
+};
 
 socket.onerror = (error) => {
-  console.error("WebSocket error:", error)
-}
+  console.error("WebSocket error:", error);
+};
 
-export default socket
+export default socket;

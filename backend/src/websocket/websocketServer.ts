@@ -1,14 +1,8 @@
-import WebSocket, {
-  WebSocketServer,
-} from "ws";
-
+import WebSocket, {WebSocketServer,} from "ws";
 import generateUserId from "../utils/generateUserId";
 import { User } from "../types/room";
 
-const rooms = new Map<
-  string,
-  Map<string, User>
->();
+const rooms = new Map<string,Map<string, User>>();
 
 export const createWebSocketServer = (
   server: any

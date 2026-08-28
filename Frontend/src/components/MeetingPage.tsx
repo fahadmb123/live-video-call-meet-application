@@ -3,7 +3,7 @@ import {
   useRef,
 } from "react";
 
-import type { RemoteUser } from "../../types/webrtc";
+import type { RemoteUser } from "../types/webrtc";
 
 import VideoCard from "./VideoCard";
 import Controls from "./Controls";

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import socket from "../../ws/socket";
+import socket from "../ws/socket";
 
-import type {PeerMap,RemoteUser,} from "../../types/webrtc";
+import type {PeerMap,RemoteUser,} from "../types/webrtc";
 import { toast } from "react-toastify";
 
 function useWebRTC() {
