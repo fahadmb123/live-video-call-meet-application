@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import socket from "../../ws/socket";
 
-import type {
-  PeerMap,
-  RemoteUser,
-} from "../../types/webrtc";
+import type {PeerMap,RemoteUser,} from "../../types/webrtc";
+import { toast } from "react-toastify";
 
 function useWebRTC() {
   const localStreamRef =
@@ -230,19 +228,14 @@ function useWebRTC() {
       );
     };
 
-  const joinRoom = async (
-    roomId: string,
-    username: string
-  ) => {
+  const joinRoom = async (roomId: string,username: string) => {
     if (!roomId.trim()) {
-      alert("Please enter a room ID");
-
+      toast.error("Please enter a room ID")
       return false;
     }
 
     if (!username.trim()) {
-      alert("Please enter your name");
-
+      toast.error("Please enter your name")
       return false;
     }
 

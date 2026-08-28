@@ -1,25 +1,15 @@
+
+
 type JoinPageProps = {
   roomId: string;
   username: string;
-
-  setRoomId: (
-    value: string
-  ) => void;
-
-  setUsername: (
-    value: string
-  ) => void;
-
+  setRoomId: (value: string) => void;
+  setUsername: (value: string ) => void;
   onJoin: () => void;
 };
 
-function JoinPage({
-  roomId,
-  username,
-  setRoomId,
-  setUsername,
-  onJoin,
-}: JoinPageProps) {
+function JoinPage({roomId,username,setRoomId,setUsername,onJoin,}: JoinPageProps) {
+
   return (
     <div className="join-page">
       <div className="join-card">
